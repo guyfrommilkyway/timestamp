@@ -37,18 +37,19 @@ app.get('/api/:date?', (req, res) => {
 		return; // terminate function
 	}
 
-	if (isNaN(new Date(date))) {
+	const isValidUnix = isUnixTimestamp(+date);
+	const isInvalid = isNaN(new Date(date)) && !isValidUnix;
+
+	if (isInvalid) {
 		res.json({ error: 'Invalid Date' });
 
 		return; // terminate function
 	}
 
-	const convertedDate = isUnixTimestamp(+date)
-		? new Date(date * 1000)
-		: new Date(date);
+	const convertedDate = isValidUnix ? new Date(date * 1000) : new Date(date);
 
 	res.json(
-		isUnixTimestamp(+convertedDate)
+		isValidUnix
 			? {
 					unix: date,
 					utc: convertedDate.toUTCString(),
