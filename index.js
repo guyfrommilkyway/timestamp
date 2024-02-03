@@ -1,32 +1,66 @@
-// index.js
-// where your node app starts
+// packages
+require('dotenv').config();
+const express = require('express');
+const bodyParser = require('body-parser');
 
-// init project
-var express = require('express');
-var app = express();
+// utils
+const isUnixTimestamp = require('./utils/isUnixTimestamp');
+
+const app = express();
 
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-// so that your API is remotely testable by FCC 
-var cors = require('cors');
-app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 204
+// so that your API is remotely testable by FCC
+const cors = require('cors');
+app.use(cors({ optionsSuccessStatus: 200 })); // some legacy browsers choke on 204
 
-// http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // http://expressjs.com/en/starter/basic-routing.html
-app.get("/", function (req, res) {
-  res.sendFile(__dirname + '/views/index.html');
+app.get('/', function (req, res) {
+	res.sendFile(__dirname + '/views/index.html');
 });
 
-
-// your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+// your first API endpoint...
+app.get('/api/hello', function (req, res) {
+	res.json({ greeting: 'hello API' });
 });
 
+app.get('/api/:date?', (req, res) => {
+	const { date } = req.params;
 
+	if (!date) {
+		const now = new Date();
+
+		res.json({ unix: now.getTime(), utc: now });
+
+		return; // terminate function
+	}
+
+	if (isNaN(new Date(date))) {
+		res.json({ error: 'Invalid Date' });
+
+		return; // terminate function
+	}
+
+	const convertedDate = isUnixTimestamp(+date)
+		? new Date(date * 1000)
+		: new Date(date);
+
+	res.json(
+		isUnixTimestamp(+convertedDate)
+			? {
+					unix: date,
+					utc: convertedDate.toUTCString(),
+			  }
+			: {
+					unix: convertedDate.getTime(),
+					utc: convertedDate.toUTCString(),
+			  }
+	);
+});
 
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+const listener = app.listen(process.env.PORT, function () {
+	console.log('Your app is listening on port ' + listener.address().port);
 });
