@@ -53,11 +53,11 @@ app.get('/api/:date?', (req, res) => {
 	res.json(
 		isValidUnix
 			? {
-					unix: date,
+					unix: +date,
 					utc: convertedDate.toUTCString(),
 			  }
 			: {
-					unix: convertedDate.getTime(),
+					unix: +convertedDate.getTime(),
 					utc: convertedDate.toUTCString(),
 			  }
 	);
