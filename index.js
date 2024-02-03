@@ -46,7 +46,9 @@ app.get('/api/:date?', (req, res) => {
 		return; // terminate function
 	}
 
-	const convertedDate = isValidUnix ? new Date(date * 1000) : new Date(date);
+	const convertedDate = isValidUnix
+		? new Date(+date)
+		: new Date(date.toString());
 
 	res.json(
 		isValidUnix
